@@ -1,0 +1,345 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: fadeInUp 0.4s ease;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.headerLeft {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--foreground-muted);
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9375rem;
+}
+
+.controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Date Range Filter */
+.dateFilter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    flex-wrap: wrap;
+}
+
+.dateInputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dateInput {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    padding: 0.375rem 0.625rem;
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.dateInput:focus {
+    border-color: var(--primary);
+}
+
+.dateSeparator {
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+}
+
+.datePresets {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.presetBtn {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    color: var(--foreground-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.presetBtn:hover {
+    background: var(--secondary-hover);
+    color: var(--foreground);
+}
+
+.presetActive {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Report content */
+.reportCard {
+    padding: 2rem !important;
+}
+
+.reportHeader {
+    text-align: center;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.reportTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--primary-light);
+}
+
+.reportDate {
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.reportMeta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--foreground-muted);
+}
+
+.reportMetaItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.reportMetaLabel {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--foreground-muted);
+}
+
+.reportMetaValue {
+    font-weight: 600;
+    color: var(--foreground);
+    font-size: 0.9375rem;
+}
+
+/* Sections */
+.section {
+    margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-light);
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.375rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Summary Grid */
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.summaryItem {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.summaryNumber {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+}
+
+.summaryLabel {
+    font-size: 0.6875rem;
+    color: var(--foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 0.125rem;
+}
+
+/* Progress bar */
+.progressBarWrapper {
+    margin-top: 1rem;
+}
+
+.progressBarOuter {
+    height: 20px;
+    background: var(--secondary);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+}
+
+.progressBarSeg {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.segDone {
+    background: var(--success);
+}
+
+.segProgress {
+    background: var(--primary);
+}
+
+.segBlocked {
+    background: var(--danger);
+}
+
+.segNotStarted {
+    background: rgba(122, 139, 181, 0.2);
+}
+
+.progressLegend {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--foreground-muted);
+    flex-wrap: wrap;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.legendDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* Task table */
+.taskTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.taskTable th {
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.taskTable td {
+    padding: 0.375rem 0.75rem;
+    border-bottom: 1px solid rgba(122, 139, 181, 0.06);
+    color: var(--foreground);
+}
+
+/* Status badge mini */
+.statusMini {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+.stNotStarted {
+    background: rgba(122, 139, 181, 0.12);
+    color: #8f9bb5;
+}
+
+.stInProgress {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+.stDone {
+    background: rgba(0, 184, 148, 0.15);
+    color: #55efc4;
+}
+
+.stBlocked {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+/* Issue table */
+.issueLine {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid rgba(122, 139, 181, 0.06);
+    font-size: 0.8125rem;
+}
+
+.issueLineTitle {
+    color: var(--foreground);
+}
+
+.noData {
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .summaryGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .reportMeta {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+}

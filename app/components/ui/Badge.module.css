@@ -1,0 +1,74 @@
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    line-height: 1.6;
+}
+
+/* Severity */
+.s1 {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff7675;
+    border: 1px solid rgba(214, 48, 49, 0.25);
+}
+
+.s2 {
+    background: rgba(225, 112, 85, 0.15);
+    color: #fab1a0;
+    border: 1px solid rgba(225, 112, 85, 0.25);
+}
+
+.s3 {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+    border: 1px solid rgba(253, 203, 110, 0.25);
+}
+
+.s4 {
+    background: rgba(9, 132, 227, 0.15);
+    color: #74b9ff;
+    border: 1px solid rgba(9, 132, 227, 0.25);
+}
+
+/* Status */
+.success {
+    background: var(--success-bg);
+    color: #55efc4;
+    border: 1px solid rgba(0, 184, 148, 0.25);
+}
+
+.warning {
+    background: var(--warning-bg);
+    color: #ffeaa7;
+    border: 1px solid rgba(253, 203, 110, 0.25);
+}
+
+.danger {
+    background: var(--danger-bg);
+    color: #ff7675;
+    border: 1px solid rgba(214, 48, 49, 0.25);
+}
+
+.info {
+    background: var(--info-bg);
+    color: #74b9ff;
+    border: 1px solid rgba(9, 132, 227, 0.25);
+}
+
+.neutral {
+    background: rgba(122, 139, 181, 0.12);
+    color: var(--foreground-muted);
+    border: 1px solid rgba(122, 139, 181, 0.2);
+}
+
+.primary {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+    border: 1px solid rgba(108, 92, 231, 0.25);
+}

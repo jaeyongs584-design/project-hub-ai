@@ -1,0 +1,192 @@
+.tableWrapper {
+    overflow-x: auto;
+    animation: fadeInUp 0.3s ease;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid rgba(122, 139, 181, 0.06);
+    color: var(--foreground);
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: background 0.15s;
+}
+
+.table tbody tr:hover {
+    background: var(--card-hover);
+}
+
+/* Task name with sub-task indent */
+.taskName {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 200px;
+}
+
+.subIndent {
+    padding-left: 1.5rem;
+}
+
+.subIcon {
+    color: var(--foreground-muted);
+    flex-shrink: 0;
+}
+
+.taskTitle {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.taskTitle:hover {
+    color: var(--primary-light);
+}
+
+/* Status pill - clickable */
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.statusPill:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+.statusPill .chevron {
+    opacity: 0;
+    transition: opacity 0.15s;
+    width: 10px;
+    height: 10px;
+}
+
+.statusPill:hover .chevron {
+    opacity: 1;
+}
+
+.statusNotStarted {
+    background: rgba(122, 139, 181, 0.12);
+    color: #8f9bb5;
+}
+
+.statusInProgress {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+.statusDone {
+    background: rgba(0, 184, 148, 0.15);
+    color: #55efc4;
+}
+
+.statusBlocked {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+/* Priority */
+.priority {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 6px;
+}
+
+.p0 {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+.p1 {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+}
+
+.p2 {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+.p3 {
+    background: rgba(122, 139, 181, 0.1);
+    color: var(--foreground-muted);
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.table tbody tr:hover .actions {
+    opacity: 1;
+}
+
+.actionBtn {
+    background: none;
+    border: none;
+    color: var(--foreground-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actionBtn:hover {
+    background: var(--secondary);
+    color: var(--foreground);
+}
+
+.actionBtn.delete:hover {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+.dateText {
+    font-size: 0.8125rem;
+    color: var(--foreground-muted);
+    white-space: nowrap;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--foreground-muted);
+    font-size: 0.9375rem;
+}

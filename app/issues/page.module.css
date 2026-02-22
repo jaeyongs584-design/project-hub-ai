@@ -1,0 +1,295 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: fadeInUp 0.4s ease;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.headerLeft {}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--foreground-muted);
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9375rem;
+}
+
+/* Filter bar */
+.filterBar {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.filterBtn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.375rem 0.875rem;
+    color: var(--foreground-muted);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.filterBtn:hover {
+    border-color: var(--border-hover);
+    color: var(--foreground);
+}
+
+.filterActive {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.filterCount {
+    font-size: 0.6875rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.0625rem 0.375rem;
+    border-radius: 9999px;
+}
+
+/* Issue cards */
+.issueList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.issueCard {
+    padding: 1rem 1.25rem !important;
+    transition: all 0.2s;
+}
+
+.issueCard:hover {
+    border-color: var(--border-hover);
+}
+
+.issueTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.issueLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+}
+
+.issueRight {
+    flex-shrink: 0;
+}
+
+.issueTitle {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.issueTitle:hover {
+    color: var(--primary-light);
+}
+
+.issueDesc {
+    color: var(--foreground-muted);
+    font-size: 0.8125rem;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.issueMeta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--foreground-muted);
+}
+
+.issueActions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.issueCard:hover .issueActions {
+    opacity: 1;
+}
+
+.actionBtn {
+    background: none;
+    border: none;
+    color: var(--foreground-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    display: flex;
+}
+
+.actionBtn:hover {
+    background: var(--secondary);
+    color: var(--foreground);
+}
+
+.deleteBtn:hover {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+/* Status pill */
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.statusPill:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+.chevron {
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.statusPill:hover .chevron {
+    opacity: 1;
+}
+
+.statusNew {
+    background: rgba(122, 139, 181, 0.12);
+    color: #8f9bb5;
+}
+
+.statusTriaged {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+}
+
+.statusInProgress {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+.statusResolved {
+    background: rgba(0, 184, 148, 0.15);
+    color: #55efc4;
+}
+
+.statusClosed {
+    background: rgba(122, 139, 181, 0.08);
+    color: #636e8a;
+}
+
+/* Form */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.formGroup label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--foreground-muted);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.input,
+.textarea,
+.select {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.15);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8bb5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--foreground-muted);
+    font-size: 0.9375rem;
+}

@@ -1,0 +1,351 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: fadeInUp 0.4s ease;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.headerLeft {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--foreground-muted);
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9375rem;
+}
+
+/* Summary KPI cards */
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 900px) {
+    .summaryGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.summaryCard {
+    animation: fadeInUp 0.5s ease both;
+}
+
+.summaryCard:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.summaryCard:nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.summaryCard:nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.summaryCard:nth-child(4) {
+    animation-delay: 0.15s;
+}
+
+.summaryLabel {
+    font-size: 0.75rem;
+    color: var(--foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+}
+
+.summaryValue {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.summaryUnit {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground-muted);
+}
+
+.summaryMeta {
+    font-size: 0.75rem;
+    color: var(--foreground-muted);
+    margin-top: 0.25rem;
+}
+
+.textGreen {
+    color: #55efc4;
+}
+
+.textRed {
+    color: #ff6b6b;
+}
+
+.textYellow {
+    color: #ffeaa7;
+}
+
+/* Contract amount section */
+.contractSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.contractLabel {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--foreground-muted);
+    white-space: nowrap;
+}
+
+.contractInput {
+    flex: 1;
+    max-width: 240px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.contractInput:focus {
+    border-color: var(--primary);
+}
+
+/* Category breakdown */
+.breakdownSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.categoryRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.categoryName {
+    width: 90px;
+    font-size: 0.8125rem;
+    color: var(--foreground-muted);
+    flex-shrink: 0;
+}
+
+.categoryBarWrap {
+    flex: 1;
+    height: 20px;
+    background: var(--secondary);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.categoryBarFill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    min-width: 2px;
+}
+
+.categoryAmount {
+    width: 100px;
+    text-align: right;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+/* Ledger table */
+.ledgerSection {
+    overflow-x: auto;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-light);
+    margin: 0;
+}
+
+.ledgerTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.ledgerTable th {
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.ledgerTable td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid rgba(122, 139, 181, 0.06);
+    color: var(--foreground);
+}
+
+.ledgerTable tr:hover td {
+    background: rgba(108, 92, 231, 0.04);
+}
+
+.amountCell {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.categoryBadge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    background: rgba(108, 92, 231, 0.12);
+    color: var(--primary-light);
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    color: var(--foreground-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+}
+
+.ledgerTable tr:hover .deleteBtn {
+    opacity: 1;
+}
+
+.deleteBtn:hover {
+    color: var(--danger);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 2rem;
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+}
+
+/* Form fields in modal */
+.formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.formRow {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.formRow>* {
+    flex: 1;
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.formLabel {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--foreground-muted);
+}
+
+.formInput,
+.formSelect {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+}
+
+.formInput:focus,
+.formSelect:focus {
+    border-color: var(--primary);
+}
+
+.formSelect option {
+    background: var(--card);
+    color: var(--foreground);
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Usage bar */
+.usageBar {
+    height: 6px;
+    background: var(--secondary);
+    border-radius: 3px;
+    margin-top: 0.375rem;
+    overflow: hidden;
+}
+
+.usageFill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}

@@ -1,0 +1,23 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--background);
+}
+
+.main {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+    height: 100vh;
+    background: var(--background);
+}
+
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 4rem;
+        padding-bottom: 2rem;
+    }
+}

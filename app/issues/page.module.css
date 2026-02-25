@@ -5,6 +5,152 @@
     animation: fadeInUp 0.4s ease;
 }
 
+/* Tab bar */
+.tabBar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.25rem;
+}
+
+.tabBtn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.625rem 1.25rem;
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tabBtn:hover {
+    color: var(--foreground);
+}
+
+.tabActive {
+    color: var(--primary-light);
+    border-bottom-color: var(--primary);
+}
+
+.tabCount {
+    font-size: 0.6875rem;
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+    padding: 0.0625rem 0.4rem;
+    border-radius: 9999px;
+    font-weight: 600;
+}
+
+/* Risk heatmap */
+.heatmapGrid {
+    display: grid;
+    grid-template-columns: auto repeat(3, 1fr);
+    grid-template-rows: auto repeat(3, 1fr);
+    gap: 0.25rem;
+    max-width: 320px;
+    margin-bottom: 1rem;
+}
+
+.heatmapLabel {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--foreground-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+}
+
+.heatmapCell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    min-height: 48px;
+}
+
+.heatGreen {
+    background: rgba(0, 184, 148, 0.12);
+    color: #55efc4;
+}
+
+.heatYellow {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+}
+
+.heatOrange {
+    background: rgba(225, 112, 85, 0.15);
+    color: #e17055;
+}
+
+.heatRed {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+/* CR status pills */
+.crPending {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+}
+
+.crApproved {
+    background: rgba(0, 184, 148, 0.15);
+    color: #55efc4;
+}
+
+.crRejected {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
+.crImplemented {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+/* Risk status pills */
+.riskOpen {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+}
+
+.riskMonitoring {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+.riskClosed {
+    background: rgba(122, 139, 181, 0.08);
+    color: #636e8a;
+}
+
+/* Probability/Impact badges */
+.probLow {
+    background: rgba(0, 184, 148, 0.12);
+    color: #55efc4;
+}
+
+.probMedium {
+    background: rgba(253, 203, 110, 0.15);
+    color: #ffeaa7;
+}
+
+.probHigh {
+    background: rgba(214, 48, 49, 0.15);
+    color: #ff6b6b;
+}
+
 .header {
     display: flex;
     justify-content: space-between;

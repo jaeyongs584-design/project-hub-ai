@@ -5,7 +5,7 @@ import { useProject } from '@/hooks/useProject';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Modal } from '@/app/components/ui/Modal';
-import { Plus, Trash2, DollarSign, TrendingDown, Wallet, PieChart } from 'lucide-react';
+import { ArrowLeft, Download, Plus, DollarSign, TrendingUp, Filter, Calendar as CalendarIcon, MoreHorizontal, PieChart, Wallet, Trash2 } from 'lucide-react';
 import { generateId } from '@/lib/utils';
 import { BudgetEntry } from '@/types';
 import styles from './page.module.css';

@@ -109,6 +109,22 @@ a {
 }
 
 /* ═══════════════════════════════════════════
+   Input Normalization
+   ═══════════════════════════════════════════ */
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════
    Gradient Utilities
    ═══════════════════════════════════════════ */
 
@@ -136,6 +152,7 @@ a {
   padding: 1px;
   background: linear-gradient(135deg, var(--primary), var(--accent-cyan), var(--primary));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;

@@ -121,6 +121,16 @@
   animation: fadeInUp 0.5s ease both;
 }
 
+.kpiClickable {
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.kpiClickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary) !important;
+}
+
 .kpiCard:nth-child(1) {
   animation-delay: 0s;
 }

@@ -18,6 +18,7 @@ export const Button = ({
 }: ButtonProps) => {
     return (
         <button
+            type={props.type || 'button'}
             className={cn(
                 styles.button,
                 styles[variant],

@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, AlertCircle, Users, FileText, Shield, Menu, X, BarChart3, DollarSign, ChevronDown, Plus, Settings, Trash2 } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
+import { LayoutDashboard, Calendar, AlertCircle, Users, FileText, Shield, Menu, X, BarChart3, DollarSign, ChevronDown, Plus, Settings, Trash2, CheckSquare, Rocket, Briefcase, Server, ClipboardList, LogOut, Bell } from 'lucide-react';
 import { cn, generateId } from '@/lib/utils';
 import { useProject } from '@/hooks/useProject';
 import { Modal } from '@/app/components/ui/Modal';
@@ -11,17 +12,74 @@ import { Button } from '@/app/components/ui/Button';
 import { Project } from '@/types';
 import styles from './Sidebar.module.css';
 import { getInitialTasks, getDefaultPolicies } from '@/lib/templates';
+import { useSupabaseSync } from '@/hooks/useSupabaseSync';
+import { toast } from 'sonner';
 
-const NAV_ITEMS = [
-    { href: '/', label: 'Overview', icon: LayoutDashboard },
-    { href: '/schedule', label: 'Schedule', icon: Calendar },
-    { href: '/issues', label: 'Issues', icon: AlertCircle },
-    { href: '/team', label: 'Team', icon: Users },
-    { href: '/budget', label: 'Budget', icon: DollarSign },
-    { href: '/reports', label: 'Reports', icon: BarChart3 },
-    { href: '/policies', label: 'Policies', icon: Shield },
-    { href: '/documents', label: 'Documents', icon: FileText },
-];
+const getNavGroups = (role: string) => {
+    const isAdminOrPM = role === 'Admin' || role === 'PM';
+
+    if (role === 'Client') {
+        return [
+            {
+                label: 'Core',
+                items: [
+                    { href: '/', label: 'Overview', icon: LayoutDashboard },
+                    { href: '/schedule', label: 'Schedule', icon: Calendar },
+                ],
+            },
+            {
+                label: 'Resources',
+                items: [
+                    { href: '/documents', label: 'Documents', icon: FileText },
+                ],
+            },
+            {
+                label: 'Analytics',
+                items: [
+                    { href: '/reports', label: 'Reports', icon: BarChart3 },
+                ],
+            },
+        ];
+    }
+
+    return [
+        {
+            label: 'Core',
+            items: [
+                { href: '/', label: 'Overview', icon: LayoutDashboard },
+                { href: '/schedule', label: 'Schedule', icon: Calendar },
+                { href: '/issues', label: 'Issues', icon: AlertCircle },
+            ],
+        },
+        {
+            label: 'Operations',
+            items: [
+                { href: '/actions', label: 'Actions & Decisions', icon: CheckSquare },
+                { href: '/releases', label: 'Releases', icon: Rocket },
+                ...(isAdminOrPM ? [{ href: '/assets', label: 'Assets & Systems', icon: Server }] : []),
+                { href: '/field-logs', label: 'Field Logs', icon: ClipboardList },
+            ],
+        },
+        {
+            label: 'Resources',
+            items: [
+                { href: '/team', label: 'Team', icon: Users },
+                ...(isAdminOrPM ? [
+                    { href: '/budget', label: 'Budget', icon: DollarSign },
+                    { href: '/vendors', label: 'Vendors', icon: Briefcase },
+                ] : []),
+                { href: '/documents', label: 'Documents', icon: FileText },
+                ...(isAdminOrPM ? [{ href: '/policies', label: 'Policies', icon: Shield }] : []),
+            ],
+        },
+        {
+            label: 'Analytics',
+            items: [
+                { href: '/reports', label: 'Reports', icon: BarChart3 },
+            ],
+        },
+    ];
+};
 
 const inputStyle: React.CSSProperties = {
     background: 'var(--input-bg)', border: '1px solid var(--input-border)',
@@ -35,14 +93,26 @@ const labelStyle: React.CSSProperties = {
 
 export const Sidebar = () => {
     const pathname = usePathname();
+    const { data: session } = useSession();
     const [isOpen, setIsOpen] = useState(false);
     const [projDropdown, setProjDropdown] = useState(false);
     const [isNewProjOpen, setIsNewProjOpen] = useState(false);
     const [newProjName, setNewProjName] = useState('');
     const [newProjStart, setNewProjStart] = useState('');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-    const { projects, activeProjectId, switchProject, addProject, deleteProject, projectInfo, updateProjectInfo, addActivity } = useProject();
+    const { projects, activeProjectId, switchProject, addProject, deleteProject, projectInfo, updateProjectInfo, addActivity, fetchSupabaseData, notifications, markNotificationAsRead, markAllNotificationsAsRead } = useProject();
+
+    // Fetch initial data from Supabase once on mount
+    React.useEffect(() => {
+        if (session) {
+            fetchSupabaseData();
+        }
+    }, [session, fetchSupabaseData]);
+
+    // Setup real-time subscriptions
+    useSupabaseSync();
 
     // Settings form state
     const [sName, setSName] = useState('');
@@ -95,6 +165,20 @@ export const Sidebar = () => {
             policies: getDefaultPolicies(),
             budget: { contractAmount: 0, entries: [] },
             activities: [],
+            risks: [],
+            changeRequests: [],
+            actionItems: [],
+            decisions: [],
+            meetings: [],
+            communications: [],
+            milestones: [],
+            deployments: [],
+            vendors: [],
+            procurements: [],
+            assets: [],
+            systems: [],
+            siteLogs: [],
+            notifications: [],
         };
         addProject(proj);
         setNewProjName('');
@@ -102,6 +186,26 @@ export const Sidebar = () => {
         setIsNewProjOpen(false);
         setProjDropdown(false);
     };
+
+    const userRole = (session?.user as { role?: string })?.role || 'Admin';
+    const navGroups = getNavGroups(userRole);
+    const canEditProject = userRole === 'Admin' || userRole === 'PM';
+
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    const prevNotifCount = React.useRef(notifications.length);
+    React.useEffect(() => {
+        if (notifications.length > prevNotifCount.current) {
+            const newNotif = notifications[0];
+            if (newNotif && !newNotif.read) {
+                toast(newNotif.title, { description: newNotif.message });
+            }
+        }
+        prevNotifCount.current = notifications.length;
+    }, [notifications]);
+
+    // Early return ONLY after all hooks are absolutely finished!
+    if (pathname === '/login' || pathname === '/signup') return null;
 
     return (
         <>
@@ -131,13 +235,15 @@ export const Sidebar = () => {
                     >
                         <span className={styles.projectName}>{projectInfo.name || 'Select Project'}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <button
-                                className={styles.settingsBtn}
-                                onClick={(e) => { e.stopPropagation(); openSettings(); }}
-                                title="Project Settings"
-                            >
-                                <Settings size={13} />
-                            </button>
+                            {canEditProject && (
+                                <button
+                                    className={styles.settingsBtn}
+                                    onClick={(e) => { e.stopPropagation(); openSettings(); }}
+                                    title="Project Settings"
+                                >
+                                    <Settings size={13} />
+                                </button>
+                            )}
                             <ChevronDown size={14} className={cn(styles.projChevron, projDropdown && styles.projChevronOpen)} />
                         </div>
                     </div>
@@ -150,7 +256,7 @@ export const Sidebar = () => {
                                     onClick={() => { switchProject(proj.id); setProjDropdown(false); }}
                                 >
                                     <span>{proj.info.name}</span>
-                                    {projects.length > 1 && proj.id !== activeProjectId && (
+                                    {canEditProject && projects.length > 1 && proj.id !== activeProjectId && (
                                         <button
                                             className={styles.projDeleteBtn}
                                             onClick={(e) => { e.stopPropagation(); deleteProject(proj.id); }}
@@ -161,43 +267,73 @@ export const Sidebar = () => {
                                     )}
                                 </div>
                             ))}
-                            <button
-                                className={styles.newProjectBtn}
-                                onClick={() => { setIsNewProjOpen(true); setProjDropdown(false); }}
-                            >
-                                <Plus size={14} /> New Project
-                            </button>
+                            {canEditProject && (
+                                <button
+                                    className={styles.newProjectBtn}
+                                    onClick={() => { setIsNewProjOpen(true); setProjDropdown(false); }}
+                                >
+                                    <Plus size={14} /> New Project
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
 
                 <nav className={styles.nav}>
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.href;
-                        const Icon = item.icon;
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(styles.navItem, isActive && styles.active)}
-                                onClick={() => setIsOpen(false)}
-                            >
-                                {isActive && <div className={styles.activeIndicator} />}
-                                <Icon size={18} className={styles.icon} />
-                                <span>{item.label}</span>
-                            </Link>
-                        );
-                    })}
+                    {navGroups.map((group) => (
+                        <div key={group.label} className={styles.navGroup}>
+                            <span className={styles.navGroupLabel}>{group.label}</span>
+                            {group.items.map((item) => {
+                                const isActive = pathname === item.href;
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={cn(styles.navItem, isActive && styles.active)}
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        {isActive && <div className={styles.activeIndicator} />}
+                                        <Icon size={18} className={styles.icon} />
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ))}
                 </nav>
 
                 <div className={styles.footer}>
+                    <div style={{ padding: '0 1rem', marginBottom: '0.5rem' }}>
+                        <button
+                            className={styles.navItem}
+                            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', border: 'none', background: 'transparent' }}
+                            onClick={() => setIsNotifOpen(true)}
+                        >
+                            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                <Bell size={18} className={styles.icon} />
+                                <span>Notifications</span>
+                            </div>
+                            {unreadCount > 0 && (
+                                <span style={{ background: 'var(--brand-primary)', color: 'white', fontSize: '0.75rem', padding: '0.1rem 0.4rem', borderRadius: '1rem' }}>
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </button>
+                    </div>
                     <div className={styles.userProfile}>
-                        <div className={styles.avatar}>PM</div>
+                        <div className={styles.avatar}>{session?.user?.name?.charAt(0) || 'U'}</div>
                         <div className={styles.userInfo}>
-                            <p className={styles.userName}>Project Manager</p>
-                            <p className={styles.userRole}>AGS</p>
+                            <p className={styles.userName}>{session?.user?.name || 'User'}</p>
+                            <p className={styles.userRole}>{(session?.user as { role?: string })?.role || 'AGS'}</p>
                         </div>
-                        <div className={styles.onlineDot} />
+                        <button
+                            onClick={() => signOut({ callbackUrl: '/login' })}
+                            style={{ background: 'none', border: 'none', color: 'var(--foreground-muted)', cursor: 'pointer', padding: '0.25rem', display: 'flex' }}
+                            title="Sign Out"
+                        >
+                            <LogOut size={16} />
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -268,6 +404,33 @@ export const Sidebar = () => {
                         <Button onClick={handleSaveSettings}>Save Changes</Button>
                     </div>
                 </div>
+            </Modal>
+
+            {/* Notifications Modal */}
+            <Modal isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} title="Notifications">
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                    <Button variant="ghost" size="sm" onClick={() => markAllNotificationsAsRead()}>
+                        Mark all as read
+                    </Button>
+                </div>
+                {notifications.length === 0 ? (
+                    <p style={{ color: 'var(--text-muted)' }}>No notifications yet.</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                        {notifications.map(n => (
+                            <div key={n.id} style={{ padding: '0.75rem', background: n.read ? 'transparent' : 'var(--surface-2)', border: '1px solid var(--border-color)', borderRadius: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ flex: 1 }}>
+                                    <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.875rem', fontWeight: n.read ? 500 : 700, color: 'var(--foreground)' }}>{n.title}</h4>
+                                    <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{n.message}</p>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.5rem' }}>{new Date(n.timestamp).toLocaleString()}</span>
+                                </div>
+                                {!n.read && (
+                                    <button onClick={() => markNotificationAsRead(n.id)} style={{ background: 'none', border: 'none', color: 'var(--brand-primary)', cursor: 'pointer', fontSize: '0.75rem', padding: '0.25rem' }}>Mark read</button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </Modal>
         </>
     );

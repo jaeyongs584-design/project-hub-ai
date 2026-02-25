@@ -1,27 +1,23 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useProject } from '@/hooks/useProject';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
-import { Modal } from '@/app/components/ui/Modal';
 import { Button } from '@/app/components/ui/Button';
-import { Brain, TrendingUp, Clock, AlertTriangle, CheckCircle2, Zap, Target, Activity, DollarSign, ShieldAlert, Plus } from 'lucide-react';
+import { TrendingUp, Clock, AlertTriangle, Activity, DollarSign, ShieldAlert, Rocket, Lightbulb, RefreshCw, CheckCircle, Bot, Loader2, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 import styles from './page.module.css';
-import { cn, generateId } from '@/lib/utils';
-import { Task, Issue } from '@/types';
+import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
-  const { tasks, issues, members, projectInfo, budget, activities, addTask, addIssue, addActivity } = useProject();
+  const { tasks, issues, risks, members, projectInfo, budget, activities, changeRequests, actionItems, deployments, decisions } = useProject();
+  const router = useRouter();
+
+  const [aiSummary, setAiSummary] = React.useState<string | null>(null);
+  const [isAILoading, setIsAILoading] = React.useState(false);
 
   const today = new Date().toISOString().split('T')[0];
-
-  // Quick-add state
-  const [addTaskOpen, setAddTaskOpen] = useState(false);
-  const [addIssueOpen, setAddIssueOpen] = useState(false);
-  const [qTaskTitle, setQTaskTitle] = useState('');
-  const [qTaskDue, setQTaskDue] = useState('');
-  const [qIssueTitle, setQIssueTitle] = useState('');
-  const [qIssueSev, setQIssueSev] = useState<'S1' | 'S2' | 'S3' | 'S4'>('S3');
 
   const metrics = useMemo(() => {
     const total = tasks.length;
@@ -34,15 +30,27 @@ export default function Dashboard() {
     const highIssues = issues.filter(i => (i.severity === 'S1' || i.severity === 'S2') && i.status !== 'Resolved' && i.status !== 'Closed');
     const openIssues = issues.filter(i => i.status !== 'Resolved' && i.status !== 'Closed');
 
-    return { total, completed, inProgress, blocked, notStarted, progress, overdue, highIssues, openIssues };
-  }, [tasks, issues, today]);
+    const pendingCRs = (changeRequests || []).filter(cr => cr.status === 'Pending').length;
+    const overdueActions = (actionItems || []).filter(a => a.dueDate && a.dueDate < today && a.status !== 'Done').length;
+
+    return { total, completed, inProgress, blocked, notStarted, progress, overdue, highIssues, openIssues, pendingCRs, overdueActions };
+  }, [tasks, issues, changeRequests, actionItems, today]);
 
   // Project Health
   const health = useMemo(() => {
-    const { overdue, blocked, highIssues } = metrics;
-    if (overdue.length >= 3 || highIssues.length >= 3 || blocked >= 3) return { label: 'Critical', color: '#ff6b6b', emoji: '🔴' };
-    if (overdue.length >= 1 || highIssues.length >= 1 || blocked >= 1) return { label: 'At Risk', color: '#ffeaa7', emoji: '🟡' };
-    return { label: 'On Track', color: '#55efc4', emoji: '🟢' };
+    const { overdue, blocked, highIssues, overdueActions, pendingCRs } = metrics;
+    const reasons = [];
+    if (overdue.length > 0) reasons.push(`${overdue.length} overdue tasks`);
+    if (overdueActions > 0) reasons.push(`${overdueActions} overdue actions`);
+    if (highIssues.length > 0) reasons.push(`${highIssues.length} critical issues`);
+    if (pendingCRs > 3) reasons.push(`${pendingCRs} pending CRs`);
+    if (blocked > 0) reasons.push(`${blocked} blocked tasks`);
+
+    const reasonText = reasons.length > 0 ? `Why at risk: ${reasons.join(', ')}` : 'All good';
+
+    if (overdue.length >= 3 || highIssues.length >= 3 || blocked >= 3 || overdueActions >= 3) return { label: 'At Risk', color: '#ff6b6b', emoji: '🔴', reasonText };
+    if (overdue.length >= 1 || highIssues.length >= 1 || blocked >= 1 || overdueActions >= 1 || pendingCRs > 0) return { label: 'Caution', color: '#ffeaa7', emoji: '🟡', reasonText };
+    return { label: 'On Track', color: '#55efc4', emoji: '🟢', reasonText };
   }, [metrics]);
 
   // Timeline progress
@@ -67,63 +75,85 @@ export default function Dashboard() {
 
   // What needs attention (prioritized)
   const attentionItems = useMemo(() => {
-    const items: { icon: string; text: string; severity: number }[] = [];
-    metrics.overdue.forEach(t => items.push({ icon: '🔥', text: `Overdue: "${t.title}" (due ${t.dueDate})`, severity: 1 }));
-    metrics.highIssues.forEach(i => items.push({ icon: '⚠️', text: `${i.severity} Issue: "${i.title}"`, severity: 2 }));
-    if (metrics.blocked > 0) items.push({ icon: '🚫', text: `${metrics.blocked} task(s) are blocked — investigate dependencies`, severity: 3 });
-    if (budgetSummary.percent > 80 && budgetSummary.contract > 0) items.push({ icon: '💰', text: `Budget usage at ${budgetSummary.percent}% — review spending`, severity: 4 });
-    if (timelineProgress.elapsed > timelineProgress.taskProgress + 15) items.push({ icon: '⏰', text: `Timeline: ${timelineProgress.elapsed}% elapsed but only ${timelineProgress.taskProgress}% completed`, severity: 5 });
-    if (items.length === 0) items.push({ icon: '✅', text: 'All clear! Project is on track.', severity: 99 });
+    const items: { icon: string; text: string; severity: number; link: string }[] = [];
+    metrics.overdue.forEach(t => items.push({ icon: '🔥', text: `Overdue Task: "${t.title}" (due ${t.dueDate})`, severity: 1, link: '/schedule' }));
+    metrics.highIssues.forEach(i => items.push({ icon: '⚠️', text: `${i.severity} Issue: "${i.title}"`, severity: 2, link: '/issues' }));
+    if (metrics.overdueActions > 0) items.push({ icon: '⚡', text: `${metrics.overdueActions} Action Items are overdue`, severity: 2, link: '/actions' });
+    if (metrics.pendingCRs > 0) items.push({ icon: '🔄', text: `${metrics.pendingCRs} Change Requests pending approval`, severity: 3, link: '/issues' });
+    if (metrics.blocked > 0) items.push({ icon: '🚫', text: `${metrics.blocked} task(s) are blocked — investigate dependencies`, severity: 3, link: '/schedule' });
+    if (budgetSummary.percent > 80 && budgetSummary.contract > 0) items.push({ icon: '💰', text: `Budget usage at ${budgetSummary.percent}% — review spending`, severity: 4, link: '/budget' });
+    if (timelineProgress.elapsed > timelineProgress.taskProgress + 15) items.push({ icon: '⏰', text: `Timeline: ${timelineProgress.elapsed}% elapsed but only ${timelineProgress.taskProgress}% completed`, severity: 5, link: '/schedule' });
+    if (items.length === 0) items.push({ icon: '✅', text: 'All clear! Project is on track.', severity: 99, link: '/' });
     return items.sort((a, b) => a.severity - b.severity).slice(0, 6);
   }, [metrics, budgetSummary, timelineProgress]);
 
-  // Risk matrix counts
+  // Risk matrix counts (based on actual Risk entities)
   const riskMatrix = useMemo(() => {
-    const matrix = { s1: 0, s2: 0, s3: 0, s4: 0 };
-    issues.filter(i => i.status !== 'Resolved' && i.status !== 'Closed').forEach(i => {
-      matrix[i.severity.toLowerCase() as keyof typeof matrix]++;
+    const safeRisks = risks || [];
+    const openRisks = safeRisks.filter(r => r.status !== 'Closed');
+    const matrix = { high: 0, medium: 0, low: 0 };
+    openRisks.forEach(r => {
+      // Use combined score: prob+impact
+      const probScore = r.probability === 'High' ? 2 : r.probability === 'Medium' ? 1 : 0;
+      const impScore = r.impact === 'High' ? 2 : r.impact === 'Medium' ? 1 : 0;
+      const combined = probScore + impScore;
+      if (combined >= 3) matrix.high++;
+      else if (combined >= 2) matrix.medium++;
+      else matrix.low++;
     });
     return matrix;
-  }, [issues]);
+  }, [risks]);
+
+  const upcomingDeploys = useMemo(() => {
+    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    return (deployments || []).filter(d =>
+      d.status !== 'Deployed' && d.status !== 'Completed' && d.status !== 'Failed' && d.status !== 'Rolled Back'
+      && (d.deploymentDate || d.plannedDate || '') >= today
+      && (d.deploymentDate || d.plannedDate || '') <= nextWeek
+    ).sort((a, b) => (a.deploymentDate || a.plannedDate || '').localeCompare(b.deploymentDate || b.plannedDate || ''));
+  }, [deployments, today]);
+
+  const recentDecisions = useMemo(() => {
+    return [...(decisions || [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
+  }, [decisions]);
 
   const projectName = projectInfo?.name || 'AGS Project';
 
-  // Quick-add handlers
-  const handleQuickTask = () => {
-    if (!qTaskTitle.trim()) return;
-    const task: Task = {
-      id: generateId('t'),
-      title: qTaskTitle.trim(),
-      status: 'Not Started',
-      priority: 'P2',
-      startDate: today,
-      dueDate: qTaskDue || today,
-      progress: 0,
-      dependencies: [],
-      tags: [],
-    };
-    addTask(task);
-    addActivity({ id: generateId('act'), timestamp: new Date().toISOString(), action: 'Task created', detail: `"${task.title}"`, category: 'task' });
-    setQTaskTitle('');
-    setQTaskDue('');
-    setAddTaskOpen(false);
-  };
+  // Format currency
+  const fmtCurrency = (n: number) => `$${n.toLocaleString()}`;
 
-  const handleQuickIssue = () => {
-    if (!qIssueTitle.trim()) return;
-    const issue: Issue = {
-      id: generateId('i'),
-      title: qIssueTitle.trim(),
-      description: '',
-      severity: qIssueSev,
-      status: 'New',
-      createdAt: new Date().toISOString(),
-    };
-    addIssue(issue);
-    addActivity({ id: generateId('act'), timestamp: new Date().toISOString(), action: 'Issue created', detail: `[${qIssueSev}] "${issue.title}"`, category: 'issue' });
-    setQIssueTitle('');
-    setQIssueSev('S3');
-    setAddIssueOpen(false);
+  const handleGenerateSummary = async () => {
+    setIsAILoading(true);
+    try {
+      const summaryContext = `
+        Project: ${projectName}
+        Health: ${health.label} (${health.reasonText})
+        Tasks: ${metrics.progress}%
+        Open Issues: ${metrics.openIssues.length} (High Severity: ${metrics.highIssues.length})
+        Overdue Items: ${metrics.overdue.length} tasks, ${metrics.overdueActions} actions
+        Budget Spent: ${budgetSummary.percent}%
+        Recent Activities: ${activities.slice(0, 5).map(a => a.action).join(', ')}
+      `;
+
+      const res = await fetch('/api/generate-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: 'Write a comprehensive but concise executive summary of the project status, highlighting key risks and next steps. Do not use more than 3 bullet points.',
+          context: summaryContext
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to generate summary');
+      }
+      if (data.text) setAiSummary(data.text);
+    } catch (e: unknown) {
+      console.error(e);
+      toast.error((e as Error).message || 'AI 요약 생성 중 오류가 발생했습니다. API 키 크레딧을 확인해주세요.');
+    } finally {
+      setIsAILoading(false);
+    }
   };
 
   return (
@@ -136,21 +166,51 @@ export default function Dashboard() {
             {projectInfo.startDate} ~ {projectInfo.endDate}
           </p>
         </div>
-        <div className={styles.headerRight}>
-          <div className={styles.quickActions}>
-            <button className={styles.quickAddBtn} onClick={() => setAddTaskOpen(true)} title="Quick add task">
-              <Plus size={14} /> Task
-            </button>
-            <button className={styles.quickAddBtn} onClick={() => setAddIssueOpen(true)} title="Quick add issue">
-              <Plus size={14} /> Issue
-            </button>
-          </div>
-          <div className={styles.healthBadge} style={{ borderColor: health.color }}>
-            <span>{health.emoji}</span>
-            <span style={{ color: health.color }}>{health.label}</span>
-          </div>
+        <div className={styles.healthBadge} style={{ borderColor: health.color }} title={health.reasonText}>
+          <span>{health.emoji}</span>
+          <span style={{ color: health.color }}>{health.label}</span>
         </div>
       </header>
+
+      {/* Unified AI Executive Summary Card */}
+      <Card style={{ marginBottom: '1.5rem', backgroundColor: 'var(--surface-2)', border: '1px solid var(--brand-primary)' }}>
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={styles.aiTitleGroup}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.125rem', fontWeight: 600, color: 'var(--brand-primary)' }}>
+                <Bot size={20} /> AI Executive Summary
+              </h3>
+              <p className={styles.aiSubtitle} style={{ marginTop: '0.25rem', fontSize: '0.875rem' }}>Automated Insights & Real-time Analysis</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={handleGenerateSummary} disabled={isAILoading}>
+              {isAILoading ? <Loader2 size={14} className={styles.spin} style={{ marginRight: '0.5rem' }} /> : <Lightbulb size={14} style={{ marginRight: '0.5rem' }} />}
+              {aiSummary ? 'Regenerate Analysis' : 'Generate Analysis'}
+            </Button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '0.875rem', color: 'var(--foreground)' }}>🚀 <strong>Progress:</strong> {projectName} is {metrics.progress}% complete ({metrics.completed}/{metrics.total} tasks). {metrics.inProgress > 0 ? `${metrics.inProgress} in progress.` : ''}</div>
+            <div style={{ fontSize: '0.875rem', color: 'var(--foreground)' }}>⚠️ <strong>Risks:</strong> {metrics.overdue.length} overdue, {metrics.blocked} blocked. {metrics.highIssues.length > 0 ? `${metrics.highIssues.length} high-severity issues.` : 'No critical issues.'}</div>
+            {budgetSummary.contract > 0 && (
+              <div style={{ fontSize: '0.875rem', color: 'var(--foreground)' }}>💰 <strong>Budget:</strong> {budgetSummary.percent}% spent. {budgetSummary.remaining > 0 ? `$${budgetSummary.remaining.toLocaleString()} remaining.` : 'Budget fully consumed!'}</div>
+            )}
+            <div style={{ fontSize: '0.875rem', color: 'var(--foreground)' }}>🎯 <strong>Team:</strong> {members.length > 0 ? `${members.length} members across ${new Set(members.map(m => m.role)).size} roles.` : 'Register team members to track allocation.'}</div>
+          </div>
+
+          {aiSummary ? (
+            <div style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--foreground)', whiteSpace: 'pre-wrap', backgroundColor: 'var(--surface-3)', padding: '1rem', borderRadius: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--brand-primary)', fontWeight: 600 }}>
+                <Sparkles size={16} /> AI Assessment
+              </div>
+              {aiSummary}
+            </div>
+          ) : (
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'center', padding: '1rem 0' }}>
+              Click &quot;Generate Analysis&quot; to get a deep-dive AI assessment of the current project state.
+            </p>
+          )}
+        </div>
+      </Card>
 
       {/* Timeline Bar */}
       <div className={styles.timelineSection}>
@@ -170,7 +230,7 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div className={styles.kpiGrid}>
-        <Card glass glow className={styles.kpiCard}>
+        <Card glass glow className={cn(styles.kpiCard, styles.kpiClickable)} onClick={() => router.push('/schedule')}>
           <CardContent>
             <div className={styles.kpiHeader}>
               <span className={styles.kpiLabel}>Overall Progress</span>
@@ -184,7 +244,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card glass glow className={styles.kpiCard}>
+        <Card glass glow className={cn(styles.kpiCard, styles.kpiClickable)} onClick={() => router.push('/schedule')}>
           <CardContent>
             <div className={styles.kpiHeader}>
               <span className={styles.kpiLabel}>Overdue</span>
@@ -197,7 +257,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card glass glow className={styles.kpiCard}>
+        <Card glass glow className={cn(styles.kpiCard, styles.kpiClickable)} onClick={() => router.push('/issues')}>
           <CardContent>
             <div className={styles.kpiHeader}>
               <span className={styles.kpiLabel}>Open Issues</span>
@@ -208,21 +268,51 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card glass glow className={styles.kpiCard}>
+        <Card glass glow className={cn(styles.kpiCard, styles.kpiClickable)} onClick={() => router.push('/issues')}>
           <CardContent>
             <div className={styles.kpiHeader}>
-              <span className={styles.kpiLabel}>Budget</span>
+              <span className={styles.kpiLabel}>Pending CRs</span>
+              <div className={cn(styles.kpiIconBox, styles.kpiIconBlue)}><RefreshCw size={18} /></div>
+            </div>
+            <div className={styles.bigNumber}>{metrics.pendingCRs}</div>
+            <div className={styles.metaText}>{metrics.pendingCRs > 0 ? "Awaiting approvals" : "All clear"}</div>
+          </CardContent>
+        </Card>
+
+        <Card glass glow className={cn(styles.kpiCard, styles.kpiClickable)} onClick={() => router.push('/actions')}>
+          <CardContent>
+            <div className={styles.kpiHeader}>
+              <span className={styles.kpiLabel}>Overdue Actions</span>
+              <div className={cn(styles.kpiIconBox, styles.kpiIconRed)}><CheckCircle size={18} /></div>
+            </div>
+            <div className={cn(styles.bigNumber, metrics.overdueActions > 0 ? styles.textRed : styles.textGreen)}>{metrics.overdueActions}</div>
+            <div className={styles.metaText}>{metrics.overdueActions > 0 ? "Requires follow-up" : "All actions on time"}</div>
+          </CardContent>
+        </Card>
+
+        <Card glass glow className={cn(styles.kpiCard, styles.kpiClickable)} onClick={() => router.push('/budget')}>
+          <CardContent>
+            <div className={styles.kpiHeader}>
+              <span className={styles.kpiLabel}>Remaining Budget</span>
               <div className={cn(styles.kpiIconBox, styles.kpiIconGreen)}><DollarSign size={18} /></div>
             </div>
-            <div className={styles.bigNumber}>
-              {budgetSummary.percent}<span className={styles.numberUnit}>%</span>
-            </div>
             {budgetSummary.contract > 0 ? (
-              <div className={styles.metaText}>
-                ${budgetSummary.spent.toLocaleString()} / ${budgetSummary.contract.toLocaleString()}
-              </div>
+              <>
+                <div className={styles.bigNumber}>
+                  {fmtCurrency(budgetSummary.remaining)}
+                </div>
+                <div className={styles.progressBar}>
+                  <div className={styles.progressFill} style={{ width: `${budgetSummary.percent}%`, background: budgetSummary.percent > 80 ? 'linear-gradient(90deg, #ff6b6b, #e17055)' : undefined }} />
+                </div>
+                <div className={styles.metaText}>
+                  {budgetSummary.percent}% spent of {fmtCurrency(budgetSummary.contract)}
+                </div>
+              </>
             ) : (
-              <div className={styles.metaText}>Set budget in Budget page</div>
+              <>
+                <div className={styles.bigNumber} style={{ fontSize: '1.125rem', color: 'var(--foreground-muted)' }}>Not Set</div>
+                <div className={styles.metaText}>Go to Budget page to set contract amount</div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -230,50 +320,97 @@ export default function Dashboard() {
 
       {/* Bottom Grid: Attention + Risk + AI */}
       <div className={styles.bottomGrid}>
-        {/* What Needs Attention */}
-        <Card className={styles.listCard}>
-          <CardHeader>
-            <CardTitle>
-              <ShieldAlert size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
-              What Needs Attention
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={styles.actionsList}>
-              {attentionItems.map((item, i) => (
-                <div key={i} className={styles.actionItem}>
-                  <span className={styles.actionIcon}>{item.icon}</span>
-                  <span className={styles.actionText}>{item.text}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* LEFT COLUMN: Attention & Decisions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* What Needs Attention */}
+          <Card className={styles.listCard}>
+            <CardHeader>
+              <CardTitle>
+                <ShieldAlert size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }} />
+                What Needs Attention
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={styles.actionsList}>
+                {attentionItems.map((item, i) => (
+                  <div key={i} className={cn(styles.actionItem, styles.kpiClickable)} onClick={() => router.push(item.link)} style={{ cursor: 'pointer' }}>
+                    <span className={styles.actionIcon}>{item.icon}</span>
+                    <span className={styles.actionText}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Risk Matrix + Activity */}
+          {/* Recent Decisions */}
+          <Card className={styles.listCard}>
+            <CardHeader>
+              <CardTitle>
+                <Lightbulb size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom', color: 'var(--primary-light)' }} />
+                Recent Decisions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentDecisions.length === 0 ? (
+                <div className={styles.emptyState}>No recent decisions</div>
+              ) : (
+                <div className={styles.actionsList}>
+                  {recentDecisions.map(d => (
+                    <div key={d.id} className={styles.actionItem} onClick={() => router.push('/actions')} style={{ cursor: 'pointer' }}>
+                      <span className={styles.actionIcon}>💡</span>
+                      <span className={styles.actionText}><strong>{d.summary}</strong> <span style={{ color: 'var(--foreground-muted)' }}>(by {d.decidedBy || 'Team'})</span></span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* RIGHT COLUMN: Risk + Deployments + Activity */}
         <div className={styles.rightColumn}>
           {/* Risk Matrix */}
-          <Card className={styles.riskCard}>
+          <Card className={cn(styles.riskCard, styles.kpiClickable)} onClick={() => router.push('/issues')} style={{ cursor: 'pointer' }}>
             <CardHeader><CardTitle>Risk Matrix</CardTitle></CardHeader>
             <CardContent>
               <div className={styles.riskGrid}>
                 <div className={cn(styles.riskCell, styles.riskS1)}>
-                  <span className={styles.riskCount}>{riskMatrix.s1}</span>
-                  <span className={styles.riskLabel}>Critical</span>
-                </div>
-                <div className={cn(styles.riskCell, styles.riskS2)}>
-                  <span className={styles.riskCount}>{riskMatrix.s2}</span>
+                  <span className={styles.riskCount}>{riskMatrix.high}</span>
                   <span className={styles.riskLabel}>High</span>
                 </div>
                 <div className={cn(styles.riskCell, styles.riskS3)}>
-                  <span className={styles.riskCount}>{riskMatrix.s3}</span>
+                  <span className={styles.riskCount}>{riskMatrix.medium}</span>
                   <span className={styles.riskLabel}>Medium</span>
                 </div>
                 <div className={cn(styles.riskCell, styles.riskS4)}>
-                  <span className={styles.riskCount}>{riskMatrix.s4}</span>
+                  <span className={styles.riskCount}>{riskMatrix.low}</span>
                   <span className={styles.riskLabel}>Low</span>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Deployments */}
+          <Card className={styles.listCard}>
+            <CardHeader>
+              <CardTitle>
+                <Rocket size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom', color: 'var(--accent-cyan)' }} />
+                Upcoming Deployments (7 Days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {upcomingDeploys.length === 0 ? (
+                <div className={styles.emptyState}>No deployments planned</div>
+              ) : (
+                <div className={styles.actionsList}>
+                  {upcomingDeploys.map(d => (
+                    <div key={d.id} className={styles.actionItem} onClick={() => router.push('/releases')} style={{ cursor: 'pointer', padding: '0.375rem 0' }}>
+                      <span className={cn(styles.envBadge, styles.actionIcon)} style={{ fontSize: '0.65rem', padding: '0.1rem 0.3rem' }}>{d.environment}</span>
+                      <span className={styles.actionText}><strong>v{d.version}</strong> <span style={{ color: 'var(--foreground-muted)' }}>({d.deploymentDate || d.plannedDate})</span></span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -304,90 +441,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* AI Summary */}
-      <Card className={styles.aiWidget}>
-        <CardHeader className={styles.aiHeader}>
-          <div className={styles.aiIconWrapper}><Brain size={22} style={{ color: 'white' }} /></div>
-          <div className={styles.aiTitleGroup}>
-            <h3>AGS AI Weekly Summary</h3>
-            <p className={styles.aiSubtitle}>Auto-generated based on project data</p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className={styles.aiContent}>
-            <p>🚀 <strong>Progress:</strong> {projectName} is {metrics.progress}% complete ({metrics.completed}/{metrics.total} tasks). {metrics.inProgress > 0 ? `${metrics.inProgress} in progress.` : ''}</p>
-            <p>⚠️ <strong>Risks:</strong> {metrics.overdue.length} overdue, {metrics.blocked} blocked. {metrics.highIssues.length > 0 ? `${metrics.highIssues.length} high-severity issues.` : 'No critical issues.'}</p>
-            {budgetSummary.contract > 0 && (
-              <p>💰 <strong>Budget:</strong> ${budgetSummary.spent.toLocaleString()} of ${budgetSummary.contract.toLocaleString()} spent ({budgetSummary.percent}%). {budgetSummary.remaining > 0 ? `$${budgetSummary.remaining.toLocaleString()} remaining.` : 'Budget fully consumed!'}</p>
-            )}
-            <p>🎯 <strong>Team:</strong> {members.length > 0 ? `${members.length} members across ${new Set(members.map(m => m.team)).size} teams.` : 'Register team members to track allocation.'}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Add Task Modal */}
-      <Modal isOpen={addTaskOpen} onClose={() => setAddTaskOpen(false)} title="Quick Add Task" size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label className={styles.formLabel}>Task Title *</label>
-            <input
-              className={styles.formInput}
-              value={qTaskTitle}
-              onChange={(e) => setQTaskTitle(e.target.value)}
-              placeholder="Enter task title"
-              onKeyDown={(e) => e.key === 'Enter' && handleQuickTask()}
-              autoFocus
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label className={styles.formLabel}>Due Date</label>
-            <input
-              type="date"
-              className={styles.formInput}
-              value={qTaskDue}
-              onChange={(e) => setQTaskDue(e.target.value)}
-            />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-            <Button variant="ghost" onClick={() => setAddTaskOpen(false)}>Cancel</Button>
-            <Button onClick={handleQuickTask}>Add Task</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Quick Add Issue Modal */}
-      <Modal isOpen={addIssueOpen} onClose={() => setAddIssueOpen(false)} title="Quick Add Issue" size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label className={styles.formLabel}>Issue Title *</label>
-            <input
-              className={styles.formInput}
-              value={qIssueTitle}
-              onChange={(e) => setQIssueTitle(e.target.value)}
-              placeholder="Describe the issue"
-              onKeyDown={(e) => e.key === 'Enter' && handleQuickIssue()}
-              autoFocus
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label className={styles.formLabel}>Severity</label>
-            <select
-              className={styles.formInput}
-              value={qIssueSev}
-              onChange={(e) => setQIssueSev(e.target.value as 'S1' | 'S2' | 'S3' | 'S4')}
-            >
-              <option value="S1">S1 — Critical</option>
-              <option value="S2">S2 — High</option>
-              <option value="S3">S3 — Medium</option>
-              <option value="S4">S4 — Low</option>
-            </select>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-            <Button variant="ghost" onClick={() => setAddIssueOpen(false)}>Cancel</Button>
-            <Button onClick={handleQuickIssue}>Report Issue</Button>
-          </div>
-        </div>
-      </Modal>
+      {/* End of content */}
     </div>
   );
 }

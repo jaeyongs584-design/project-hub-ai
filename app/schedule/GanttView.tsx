@@ -8,10 +8,13 @@ import { differenceInDays, parseISO, addDays, format, isWeekend, isToday } from 
 import { cn } from '@/lib/utils';
 
 export default function GanttView() {
-    const { tasks } = useProject();
+    const { tasks, milestones } = useProject();
 
-    const { days, startParam, totalDays } = useMemo(() => {
-        const dates = tasks.flatMap(t => [t.startDate, t.dueDate].filter(Boolean));
+    const { days, startParam } = useMemo(() => {
+        const dates = [
+            ...tasks.flatMap(t => [t.startDate, t.dueDate].filter(Boolean)),
+            ...milestones.map(m => m.date).filter(Boolean)
+        ];
         if (dates.length === 0) return { days: [], startParam: new Date(), totalDays: 0 };
 
         const sorted = [...dates].sort();
@@ -27,7 +30,7 @@ export default function GanttView() {
             startParam: sp,
             totalDays: td,
         };
-    }, [tasks]);
+    }, [tasks, milestones]);
 
     if (days.length === 0) {
         return <Card className={styles.card}><div className={styles.emptyState}>No tasks with dates to display</div></Card>;
@@ -58,11 +61,23 @@ export default function GanttView() {
     // Build parent→child tree for display
     const parentTasks = tasks.filter(t => !t.parentId);
     const getChildren = (parentId: string) => tasks.filter(t => t.parentId === parentId);
-    const orderedTasks: { task: typeof tasks[0]; isChild: boolean }[] = [];
+
+    // Ordered items combining tasks and actual milestones
+    type GanttItem =
+        | { type: 'task', id: string, title: string, isChild: boolean, data: typeof tasks[0] }
+        | { type: 'milestone', id: string, title: string, isChild: boolean, data: typeof milestones[0] };
+
+    const orderedItems: GanttItem[] = [];
+
+    // Add real milestones first
+    milestones.forEach(m => {
+        orderedItems.push({ type: 'milestone', id: `ms-${m.id}`, title: m.title, isChild: false, data: m });
+    });
+
     parentTasks.forEach(parent => {
-        orderedTasks.push({ task: parent, isChild: false });
+        orderedItems.push({ type: 'task', id: `task-${parent.id}`, title: parent.title, isChild: false, data: parent });
         getChildren(parent.id).forEach(child => {
-            orderedTasks.push({ task: child, isChild: true });
+            orderedItems.push({ type: 'task', id: `task-${child.id}`, title: child.title, isChild: true, data: child });
         });
     });
 
@@ -73,13 +88,16 @@ export default function GanttView() {
                     {/* Left Panel */}
                     <div className={styles.taskPanel}>
                         <div className={styles.taskPanelHeader}>Task</div>
-                        {orderedTasks.map(({ task, isChild }) => (
+                        {orderedItems.map((item) => (
                             <div
-                                key={task.id}
-                                className={cn(styles.taskRow, isChild && styles.taskRowChild)}
-                                title={task.title}
+                                key={item.id}
+                                className={cn(styles.taskRow, item.isChild && styles.taskRowChild)}
+                                title={item.title}
+                                style={item.type === 'milestone' || (item.type === 'task' && item.data.isMilestone) ? { color: '#a29bfe', fontWeight: 600 } : undefined}
                             >
-                                {isChild ? `↳ ${task.title}` : task.title}
+                                {item.type === 'milestone' || (item.type === 'task' && item.data.isMilestone)
+                                    ? `🏁 ${item.isChild ? '↳ ' : ''}${item.title}`
+                                    : item.isChild ? `↳ ${item.title}` : item.title}
                             </div>
                         ))}
                     </div>
@@ -100,8 +118,8 @@ export default function GanttView() {
                         </div>
 
                         {/* Task Rows */}
-                        {orderedTasks.map(({ task }) => (
-                            <div key={task.id} className={styles.timelineRow}>
+                        {orderedItems.map((item) => (
+                            <div key={item.id} className={styles.timelineRow}>
                                 {days.map((day, i) => (
                                     <div
                                         key={i}
@@ -113,13 +131,63 @@ export default function GanttView() {
                                     />
                                 ))}
                                 <div className={styles.barContainer}>
-                                    <div
-                                        className={cn(styles.taskBar, getStatusClass(task.status))}
-                                        style={getBarStyle(task.startDate, task.dueDate)}
-                                        title={`${task.title}: ${task.startDate} → ${task.dueDate}`}
-                                    >
-                                        <span className={styles.barLabel}>{task.status}</span>
-                                    </div>
+                                    {item.type === 'milestone' ? (
+                                        /* Actual Milestone Entity */
+                                        <>
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    left: `${differenceInDays(parseISO(item.data.date), startParam) * 36 + 12}px`,
+                                                    top: '2px',
+                                                    width: '14px',
+                                                    height: '14px',
+                                                    background: item.data.status === 'Completed' ? '#55efc4' :
+                                                        item.data.status === 'Delayed' ? '#ff6b6b' : '#a29bfe',
+                                                    transform: 'rotate(45deg)',
+                                                    borderRadius: '2px',
+                                                    boxShadow: '0 0 6px rgba(108,92,231,0.4)',
+                                                }}
+                                                title={`🏁 ${item.title}: ${item.data.date} (${item.data.status})`}
+                                            />
+                                        </>
+                                    ) : item.type === 'task' && item.data.isMilestone ? (
+                                        /* Legacy Task-based Milestone */
+                                        <>
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    left: `${differenceInDays(parseISO(item.data.dueDate), startParam) * 36 + 12}px`,
+                                                    top: '2px',
+                                                    width: '14px',
+                                                    height: '14px',
+                                                    background: item.data.status === 'Done' ? '#55efc4' :
+                                                        item.data.status === 'Blocked' ? '#ff6b6b' : '#a29bfe',
+                                                    transform: 'rotate(45deg)',
+                                                    borderRadius: '2px',
+                                                    boxShadow: '0 0 6px rgba(108,92,231,0.4)',
+                                                }}
+                                                title={`🏁 ${item.title}: ${item.data.dueDate} (${item.data.status})`}
+                                            />
+                                            <span style={{
+                                                position: 'absolute',
+                                                left: `${differenceInDays(parseISO(item.data.dueDate), startParam) * 36 + 30}px`,
+                                                top: '1px',
+                                                fontSize: '0.625rem',
+                                                color: '#a29bfe',
+                                                whiteSpace: 'nowrap',
+                                                fontWeight: 600,
+                                            }}>{item.data.progress > 0 ? `${item.data.progress}%` : ''}</span>
+                                        </>
+                                    ) : (
+                                        /* Normal task: bar */
+                                        <div
+                                            className={cn(styles.taskBar, getStatusClass(item.data.status))}
+                                            style={getBarStyle(item.data.startDate, item.data.dueDate)}
+                                            title={`${item.title}: ${item.data.startDate} → ${item.data.dueDate} (${item.data.progress}%)`}
+                                        >
+                                            <span className={styles.barLabel}>{item.data.progress > 0 ? `${item.data.progress}%` : item.data.status}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 {todayIndex >= 0 && (
                                     <div className={styles.todayMarker} style={{ left: `${todayIndex * 36 + 18}px` }} />

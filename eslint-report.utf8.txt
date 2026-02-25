@@ -1,0 +1,119 @@
+﻿
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\actions\page.tsx
+    3:27   warning  'useMemo' is defined but never used       @typescript-eslint/no-unused-vars
+  110:146  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:175  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:274  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\api\auth\[...nextauth]\route.ts
+  38:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\assets\page.tsx
+    9:73  warning  'CalendarIcon' is defined but never used                         @typescript-eslint/no-unused-vars
+  306:83  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  306:93  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  358:58  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  358:69  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\budget\page.tsx
+  8:36  warning  'TrendingDown' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\components\Copilot.tsx
+   1:1   error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  32:46  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  84:23  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\components\HydrationGuard.tsx
+  15:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\components\HydrationGuard.tsx:15:9
+  13 |
+  14 |     useEffect(() => {
+> 15 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |     }, []);
+  17 |
+  18 |     if (!mounted) {  react-hooks/set-state-in-effect
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\components\Sidebar.tsx
+  190:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  327:79  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\field-logs\page.tsx
+    9:55  warning  'FileText' is defined but never used                             @typescript-eslint/no-unused-vars
+  102:59  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  102:73  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\issues\page.tsx
+   27:49  warning  'tasks' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  160:69  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  185:21  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\page.tsx
+    8:10  warning  'Brain' is defined but never used                                @typescript-eslint/no-unused-vars
+  151:17  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  209:21  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  209:39  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\releases\page.tsx
+  90:168  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  96:174  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\reports\page.tsx
+  249:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  437:93  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\schedule\ListView.tsx
+  141:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\schedule\page.tsx
+   8:22   warning  'cn' is defined but never used                             @typescript-eslint/no-unused-vars
+   9:16   warning  'Milestone' is defined but never used                      @typescript-eslint/no-unused-vars
+  18:94   warning  'updateMilestone' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  18:111  warning  'deleteMilestone' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  29:11   warning  'legacyMilestoneTasks' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\team\page.tsx
+  110:9  warning  'isEdit' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\app\vendors\page.tsx
+    9:37  warning  'ExternalLink' is defined but never used                         @typescript-eslint/no-unused-vars
+  154:62  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  154:73  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\parse_eslint.js
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\F1324\Desktop\Antigrativiy\project-hub-ai\store\useStore.ts
+    3:42   warning  'Member' is defined but never used          @typescript-eslint/no-unused-vars
+    3:50   warning  'DocumentLink' is defined but never used    @typescript-eslint/no-unused-vars
+    3:64   warning  'ProjectPolicy' is defined but never used   @typescript-eslint/no-unused-vars
+    3:79   warning  'ProjectInfo' is defined but never used     @typescript-eslint/no-unused-vars
+    3:92   warning  'BudgetEntry' is defined but never used     @typescript-eslint/no-unused-vars
+    3:105  warning  'ActivityEntry' is defined but never used   @typescript-eslint/no-unused-vars
+    3:120  warning  'Risk' is defined but never used            @typescript-eslint/no-unused-vars
+    3:126  warning  'ChangeRequest' is defined but never used   @typescript-eslint/no-unused-vars
+    3:141  warning  'ActionItem' is defined but never used      @typescript-eslint/no-unused-vars
+    3:153  warning  'Decision' is defined but never used        @typescript-eslint/no-unused-vars
+    3:163  warning  'Meeting' is defined but never used         @typescript-eslint/no-unused-vars
+    3:172  warning  'Communication' is defined but never used   @typescript-eslint/no-unused-vars
+    3:187  warning  'Milestone' is defined but never used       @typescript-eslint/no-unused-vars
+    3:198  warning  'Deployment' is defined but never used      @typescript-eslint/no-unused-vars
+    3:210  warning  'Vendor' is defined but never used          @typescript-eslint/no-unused-vars
+    3:218  warning  'Procurement' is defined but never used     @typescript-eslint/no-unused-vars
+    3:231  warning  'Asset' is defined but never used           @typescript-eslint/no-unused-vars
+    3:238  warning  'SystemRegister' is defined but never used  @typescript-eslint/no-unused-vars
+    3:254  warning  'SiteLog' is defined but never used         @typescript-eslint/no-unused-vars
+  260:34   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  334:34   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+Γ£û 65 problems (32 errors, 33 warnings)
+

@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Sidebar } from './components/Sidebar';
+import { Copilot } from './components/Copilot';
 import HydrationGuard from './components/HydrationGuard';
+import AuthProvider from './components/AuthProvider';
+import { Toaster } from 'sonner';
 import styles from './Layout.module.css';
 
 export const metadata: Metadata = {
@@ -18,14 +21,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <HydrationGuard>
-          <div className={styles.container}>
-            <Sidebar />
-            <main className={styles.main}>
-              {children}
-            </main>
-          </div>
-        </HydrationGuard>
+        <AuthProvider>
+          <HydrationGuard>
+            <div className={styles.container}>
+              <Sidebar />
+              <main className={styles.main}>
+                {children}
+              </main>
+              <Copilot />
+              <Toaster position="top-right" richColors />
+            </div>
+          </HydrationGuard>
+        </AuthProvider>
       </body>
     </html>
   );

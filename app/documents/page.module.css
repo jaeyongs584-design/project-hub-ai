@@ -216,3 +216,38 @@
     gap: 0.75rem;
     margin-top: 0.5rem;
 }
+
+/* Enhancements */
+.tagContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+}
+
+.tag {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    padding: 0.125rem 0.375rem;
+    background: var(--secondary);
+    color: var(--foreground);
+    border-radius: 4px;
+}
+
+.relations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.relationPill {
+    font-size: 0.6875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--foreground-muted);
+    background: rgba(122, 139, 181, 0.08);
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+}

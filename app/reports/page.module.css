@@ -162,6 +162,37 @@
     font-size: 0.9375rem;
 }
 
+/* Template Tabs */
+.templateTabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-top: 1.5rem;
+    overflow-x: auto;
+}
+
+.tabBtn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.tabBtn:hover {
+    color: var(--foreground);
+}
+
+.tabActive {
+    color: var(--primary-light);
+    border-bottom-color: var(--primary-light);
+}
+
 /* Sections */
 .section {
     margin-bottom: 1.5rem;

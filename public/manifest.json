@@ -1,0 +1,16 @@
+{
+    "name": "AGS ProjectHub Manager",
+    "short_name": "ProjectHub",
+    "description": "AGS AI-Powered Project Management Dashboard",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0e1a",
+    "theme_color": "#6c5ce7",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "64x64",
+            "type": "image/x-icon"
+        }
+    ]
+}

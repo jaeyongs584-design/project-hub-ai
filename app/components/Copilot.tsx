@@ -132,10 +132,9 @@ export function Copilot() {
 
     // Simple markdown-ish rendering for the assistant
     const formatMessage = (content: string) => {
-        // Very basic bold and line break parsing
         return content.split('\n').map((line, i) => (
             <p key={i}>
-                {line.split(/\\*\\*(.*?)\\*\\*/g).map((part, j) =>
+                {line.split(/\*\*(.*?)\*\*/g).map((part, j) =>
                     j % 2 === 1 ? <strong key={j}>{part}</strong> : part
                 )}
             </p>

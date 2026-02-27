@@ -47,6 +47,8 @@ export interface ProjectInfo {
     startDate: string;
     endDate: string;
     manager: string;
+    location?: string;
+    coordinates?: { lat: number, lng: number };
 }
 
 export interface Task {

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { LayoutDashboard, Calendar, AlertCircle, Users, FileText, Shield, Menu, X, BarChart3, DollarSign, ChevronDown, Plus, Settings, Trash2, CheckSquare, Rocket, Briefcase, Server, ClipboardList, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, Calendar, AlertCircle, Users, FileText, Shield, Menu, X, BarChart3, DollarSign, ChevronDown, Plus, Settings, Trash2, CheckSquare, Rocket, Briefcase, Server, ClipboardList, LogOut, Bell, Globe } from 'lucide-react';
 import { cn, generateId } from '@/lib/utils';
 import { useProject } from '@/hooks/useProject';
 import { Modal } from '@/app/components/ui/Modal';
@@ -16,7 +16,7 @@ import { useSupabaseSync } from '@/hooks/useSupabaseSync';
 import { toast } from 'sonner';
 
 const getNavGroups = (role: string) => {
-    const isAdminOrPM = role === 'Admin' || role === 'PM';
+    const isAdminOrPM = role !== 'Client';
 
     if (role === 'Client') {
         return [
@@ -99,6 +99,7 @@ export const Sidebar = () => {
     const [isNewProjOpen, setIsNewProjOpen] = useState(false);
     const [newProjName, setNewProjName] = useState('');
     const [newProjStart, setNewProjStart] = useState('');
+    const [newProjLocation, setNewProjLocation] = useState('');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -121,6 +122,7 @@ export const Sidebar = () => {
     const [sManager, setSManager] = useState('');
     const [sStart, setSStart] = useState('');
     const [sEnd, setSEnd] = useState('');
+    const [sLocation, setSLocation] = useState('');
 
     const openSettings = () => {
         setSName(projectInfo.name);
@@ -129,6 +131,7 @@ export const Sidebar = () => {
         setSManager(projectInfo.manager);
         setSStart(projectInfo.startDate);
         setSEnd(projectInfo.endDate);
+        setSLocation(projectInfo.location || '');
         setIsSettingsOpen(true);
     };
 
@@ -140,6 +143,7 @@ export const Sidebar = () => {
             manager: sManager.trim(),
             startDate: sStart,
             endDate: sEnd,
+            location: sLocation.trim(),
         });
         addActivity({
             id: generateId('act'),
@@ -157,7 +161,7 @@ export const Sidebar = () => {
 
         const proj: Project = {
             id: generateId('proj'),
-            info: { name: newProjName.trim(), description: '', client: '', startDate: startDate, endDate: '', manager: '' },
+            info: { name: newProjName.trim(), description: '', client: '', startDate: startDate, endDate: '', manager: '', location: newProjLocation.trim() },
             tasks: getInitialTasks(startDate),
             issues: [],
             members: [],
@@ -183,6 +187,7 @@ export const Sidebar = () => {
         addProject(proj);
         setNewProjName('');
         setNewProjStart('');
+        setNewProjLocation('');
         setIsNewProjOpen(false);
         setProjDropdown(false);
     };
@@ -223,6 +228,19 @@ export const Sidebar = () => {
                 <div className={styles.logoContainer}>
                     <div className={styles.logoIcon}>AG</div>
                     <h1 className={styles.logoText}>AGS ProjectHub</h1>
+                </div>
+
+                <div style={{ padding: '0 1rem', marginBottom: '1rem' }}>
+                    <Link
+                        href="/portfolio"
+                        className={cn(styles.navItem, pathname === '/portfolio' && styles.active)}
+                        onClick={() => setIsOpen(false)}
+                        style={{ border: '1px solid var(--border)', background: pathname === '/portfolio' ? 'var(--background-secondary)' : 'transparent' }}
+                    >
+                        {pathname === '/portfolio' && <div className={styles.activeIndicator} />}
+                        <Globe size={18} className={styles.icon} />
+                        <span style={{ fontWeight: 600 }}>Global Portfolio</span>
+                    </Link>
                 </div>
 
                 {/* Project Selector */}
@@ -361,6 +379,15 @@ export const Sidebar = () => {
                             onChange={(e) => setNewProjStart(e.target.value)}
                         />
                     </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                        <label style={labelStyle}>Location / Region</label>
+                        <input
+                            style={inputStyle}
+                            value={newProjLocation}
+                            onChange={(e) => setNewProjLocation(e.target.value)}
+                            placeholder="e.g. San Francisco, US"
+                        />
+                    </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                         <Button variant="ghost" onClick={() => setIsNewProjOpen(false)}>Cancel</Button>
                         <Button onClick={handleNewProject}>Create</Button>
@@ -398,6 +425,10 @@ export const Sidebar = () => {
                             <label style={labelStyle}>End Date</label>
                             <input type="date" style={inputStyle} value={sEnd} onChange={(e) => setSEnd(e.target.value)} />
                         </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <label style={labelStyle}>Location / Region</label>
+                        <input style={inputStyle} value={sLocation} onChange={(e) => setSLocation(e.target.value)} placeholder="e.g. London, UK" />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
                         <Button variant="ghost" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>

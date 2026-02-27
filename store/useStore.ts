@@ -274,7 +274,8 @@ export const useStore = create<AppState>()(
                                             client: dbProj.client || '',
                                             startDate: dbProj.start_date || '',
                                             endDate: dbProj.end_date || '',
-                                            manager: dbProj.manager || ''
+                                            manager: dbProj.manager || '',
+                                            location: dbProj.location || newProjects[localIndex].info.location || ''
                                         },
                                         budget: {
                                             contractAmount,
@@ -312,6 +313,7 @@ export const useStore = create<AppState>()(
                                             startDate: dbProj.start_date || '',
                                             endDate: dbProj.end_date || '',
                                             manager: dbProj.manager || '',
+                                            location: dbProj.location || '',
                                         },
                                         budget: {
                                             contractAmount: dbProj.contract_amount ? Number(dbProj.contract_amount) : 0,
@@ -364,6 +366,7 @@ export const useStore = create<AppState>()(
                     start_date: project.info.startDate,
                     end_date: project.info.endDate,
                     manager: project.info.manager,
+                    location: project.info.location,
                 }]);
             },
             switchProject: (id) => set({ activeProjectId: id }),
@@ -376,12 +379,26 @@ export const useStore = create<AppState>()(
                         activeProjectId: s.activeProjectId === id ? remaining[0].id : s.activeProjectId,
                     };
                 }),
-            updateProjectInfo: (updates) =>
+            updateProjectInfo: async (updates) => {
                 set((s) => ({
                     projects: updateActiveProject(s.projects, s.activeProjectId, (p) => ({
                         info: { ...p.info, ...updates },
                     })),
-                })),
+                }));
+                const state = get();
+                const dbUpdates: Record<string, unknown> = {};
+                if (updates.name !== undefined) dbUpdates.name = updates.name;
+                if (updates.description !== undefined) dbUpdates.description = updates.description;
+                if (updates.client !== undefined) dbUpdates.client = updates.client;
+                if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate;
+                if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate;
+                if (updates.manager !== undefined) dbUpdates.manager = updates.manager;
+                if (updates.location !== undefined) dbUpdates.location = updates.location;
+
+                if (Object.keys(dbUpdates).length > 0) {
+                    await supabase.from('projects').update(dbUpdates).eq('id', state.activeProjectId);
+                }
+            },
 
             // ── Budget ──
             setContractAmount: async (amount) => {
